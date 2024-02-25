@@ -1,0 +1,63 @@
+html,
+body {
+    height: 100%;
+    font-family: "Audiowide", sans-serif;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    display: block;
+    position: fixed;
+    z-index: -1;
+}
+
+.button-container {
+    position: fixed;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-32%, -25%);
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+button {
+    margin: 20px;
+}
+
+#play,
+#quit {
+    font-size: 26px;
+    padding: 20px 40px;
+    border: 2px solid white;
+    color: #fff;
+    background-color: rgba(18, 18, 18, 0.2);
+    cursor: pointer;
+    border-radius: 7px;
+    outline: none;
+    position: relative;
+    font-family: 'Audiowide', 'sans-serif'
+
+}
+
+#play:hover {
+    border-color: #4fd0ba;
+}
+
+#quit:hover {
+    border-color: #ff757f;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+}
