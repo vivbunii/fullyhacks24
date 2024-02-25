@@ -10,12 +10,21 @@ function resizeCanvas() {
     canvas.height = window.innerHeight - 24;
 }
 
+const backgroundImage = new Image();
+backgroundImage.src = 'assets/Game_Level.svg';
+
 const sprite = new Image();
 sprite.src = 'assets/walk2.png';
 const spriteWidth = 518;
 const spriteHeight = 455;
 const numberOfFrames = 2;
 let currentFrame = 0;
+
+const idleSprite = new Image();
+idleSprite.src = 'assets/bounce2.png';
+const numberOfIdleFrames = 2;
+let currentIdleFrame = 0;
+let lastIdleFrameChangeTime = 0;
 
 const jumpSprite = new Image();
 jumpSprite.src = 'assets/jump.png';
@@ -74,8 +83,11 @@ function drawCharacter() {
         // Clear the entire canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
         ctx.save();
 
+        
         if (player.isJumping) {
             // Draw jump sprite
             if (direction === 1) {
