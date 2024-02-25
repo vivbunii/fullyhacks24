@@ -2,6 +2,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
@@ -13,18 +14,29 @@ function resizeCanvas() {
 const backgroundImage = new Image();
 backgroundImage.src = 'assets/Game_Level.svg';
 
-const sprite = new Image();
-sprite.src = 'assets/walk2.png';
 const spriteWidth = 518;
 const spriteHeight = 455;
-const numberOfFrames = 2;
-let currentFrame = 0;
+
+const sprite = new Image();
+sprite.src = 'assets/walk2.png';
+
+const numberOfWalkFrames = 2;
+let currentWalkFrame = 0;
 
 const idleSprite = new Image();
 idleSprite.src = 'assets/bounce2.png';
+
 const numberOfIdleFrames = 2;
 let currentIdleFrame = 0;
 let lastIdleFrameChangeTime = 0;
+
+
+const sleepSprite = new Image();
+sleepSprite.src = 'assets/sleep.png'
+
+const numberOfSleepFrames = 2;
+let currentSleepFrame = 0;
+
 
 const jumpSprite = new Image();
 jumpSprite.src = 'assets/jump.png';
@@ -49,9 +61,9 @@ const player = {
     y: canvas.height - 100,
     width: 100,
     height: 100,
-    speed: 5,
+    speed: 3,
     jumping: false,
-    jumpHeight: 100,
+    jumpHeight: 200,
     jumpCount: 0,
 };
 
@@ -72,7 +84,7 @@ function drawCharacter() {
     // Change frame only if enough time has passed
     if (now - lastFrameChangeTime > frameChangeInterval) {
         // Update the current frame for walking animation
-        currentFrame = (currentFrame + 1) % numberOfFrames;
+        currentWalkFrame = (currentWalkFrame + 1) % numberOfWalkFrames;
 
         // Update the last frame change time
         lastFrameChangeTime = now;
@@ -87,8 +99,76 @@ function drawCharacter() {
 
         ctx.save();
 
-        
-        if (player.isJumping) {
+        //Draw idle animation if no keys are being pressed.
+        if (!keys['ArrowUp'] && !keys['ArrowDown'] && !keys['ArrowLeft'] && !keys['ArrowRight'] && !player.isJumping && !player.isFalling) {
+            if (direction === 1) {
+                    ctx.drawImage(
+                        idleSprite,
+                        currentIdleFrame * spriteWidth,
+                        0,
+                        spriteWidth,
+                        spriteHeight,
+                        player.x,
+                        player.y,
+                        player.width,
+                        player.height
+                    );
+            } else {
+                    ctx.save();
+                    ctx.scale(-1, 1); // Flip horizontally
+                    ctx.drawImage(
+                        idleSprite,
+                        currentIdleFrame * spriteWidth,
+                        0,
+                        spriteWidth,
+                        spriteHeight,
+                        -player.x - player.width, // Adjust x position when facing left
+                        player.y,
+                        player.width,
+                        player.height
+                    );
+                    ctx.restore(); // Restore the canvas state after drawing
+                }
+                if (now - lastIdleFrameChangeTime > frameChangeInterval) {
+                        currentIdleFrame = (currentIdleFrame + 1) % numberOfIdleFrames;
+                        lastIdleFrameChangeTime = now;
+                }
+                
+            //Draw sleep sprite
+        } else if (keys['ArrowDown']) {
+            if (direction === 1) {
+                ctx.drawImage(
+                    sleepSprite,
+                    currentSleepFrame * spriteWidth,
+                    0,
+                    spriteWidth,
+                    spriteHeight,
+                    player.x,
+                    player.y,
+                    player.width,
+                    player.height
+                );
+            } else {
+                ctx.save();
+                ctx.scale(-1, 1); // Flip horizontally
+                ctx.drawImage(
+                    sleepSprite,
+                    currentSleepFrame * spriteWidth,
+                    0,
+                    spriteWidth,
+                    spriteHeight,
+                    -player.x - player.width, // Adjust x position when facing left
+                    player.y,
+                    player.width,
+                    player.height
+                );
+                ctx.restore(); // Restore the canvas state after drawing
+            }
+            if (now - lastFrameChangeTime > frameChangeInterval) {
+                currentSleepFrame = (currentSleepFrame + 1) % numberOfSleepFrames;
+                lastFrameChangeTime = now;
+            }
+        } else if (player.isJumping) {
             // Draw jump sprite
             if (direction === 1) {
                 ctx.drawImage(
@@ -154,7 +234,7 @@ function drawCharacter() {
             if (direction === 1) {
                 ctx.drawImage(
                     sprite,
-                    currentFrame * spriteWidth,
+                    currentWalkFrame * spriteWidth,
                     0,
                     spriteWidth,
                     spriteHeight,
@@ -168,7 +248,7 @@ function drawCharacter() {
                 ctx.scale(-1, 1); // Flip horizontally
                 ctx.drawImage(
                     sprite,
-                    currentFrame * spriteWidth,
+                    currentWalkFrame * spriteWidth,
                     0,
                     spriteWidth,
                     spriteHeight,
@@ -178,13 +258,14 @@ function drawCharacter() {
                     player.height
                 );
                 ctx.restore(); // Restore the canvas state after drawing
-            }
+                
+            } 
+        }
         }
 
         // Update the last screen update time
         lastScreenUpdateTime = now;
     }
-}
 
 
 // Update function
@@ -196,7 +277,7 @@ function update() {
 
         // Update walking frame only if not jumping or falling
         if (!player.isJumping && !player.isFalling) {
-            currentFrame = (currentFrame + 1) % numberOfFrames;
+            currentWalkFrame = (currentWalkFrame + 1) % numberOfWalkFrames;
         }
     }
 
@@ -211,7 +292,7 @@ function update() {
             if (player.y >= canvas.height - player.height) {
                 player.isFalling = false;
                 player.jumpCount = 0; // Reset jump count when landing
-                currentFrame = 0; // Reset walking frame when landing
+                currentWalkFrame = 0; // Reset walking frame when landing
             }
         }
 
@@ -242,7 +323,7 @@ function update() {
 
                 // Update jump frame only if enough time has passed
                 if (now - lastFrameChangeTime > frameChangeInterval) {
-                    player.jumpFrame = (player.jumpFrame + 1) % numberOfFrames;
+                    player.jumpFrame = (player.jumpFrame + 1) % numberOfWalkFrames;
                 }
             } else {
                 // Reached max jump height, start descending
@@ -251,7 +332,7 @@ function update() {
         } else if (player.y < canvas.height - player.height) {
             // Fall down if not jumping
             player.y += player.speed; // Descend
-            currentFrame = 0; // Reset walking frame when falling
+            currentWalkFrame = 0; // Reset walking frame when falling
         }
     }
 
